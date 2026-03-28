@@ -1,0 +1,26 @@
+<Project>
+  <!--
+    Directory.Build.targets — imported AFTER the project file is evaluated.
+    Put: anything conditioned on OutputType, RuntimeIdentifier defaults, or other
+    properties set in .csproj / SDK that are not available during Directory.Build.props.
+
+    Shared language/TFM/nullable settings: Directory.Build.props.
+  -->
+
+  <!-- Native AOT + trimming: host executables only (libraries stay default OutputType=Library). -->
+  <PropertyGroup Condition="'$(OutputType)' == 'Exe' Or '$(OutputType)' == 'WinExe'">
+    <!-- Produce a native binary via ahead-of-time compilation (no JIT at runtime). -->
+    <PublishAot>true</PublishAot>
+    <!-- Roslyn analyzers for trim/AOT compatibility (unreachable code, reflection traps, etc.). -->
+    <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+    <!-- full: aggressively remove unused IL so the published native image stays small; code must be trim-safe. -->
+    <TrimMode>full</TrimMode>
+  </PropertyGroup>
+
+  <!-- Default RID when unset; `-r` / csproj RuntimeIdentifier overrides. -->
+  <PropertyGroup Condition="('$(OutputType)' == 'Exe' Or '$(OutputType)' == 'WinExe') And '$(RuntimeIdentifier)' == ''">
+    <RuntimeIdentifier Condition="$([MSBuild]::IsOSPlatform('Windows'))">win-x64</RuntimeIdentifier>
+    <RuntimeIdentifier Condition="$([MSBuild]::IsOSPlatform('Linux'))">linux-x64</RuntimeIdentifier>
+    <RuntimeIdentifier Condition="$([MSBuild]::IsOSPlatform('OSX'))">osx-arm64</RuntimeIdentifier>
+  </PropertyGroup>
+</Project>

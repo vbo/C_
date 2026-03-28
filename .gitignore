@@ -1,0 +1,114 @@
+# C_ Project .gitignore
+# Optimized for .NET 10 + Native AOT + Roslyn Analyzer + multi-project repo
+
+# ========================
+# .NET / C# Build Artifacts
+# ========================
+**/bin/
+**/obj/
+**/out/
+**/*.user
+**/*.suo
+**/*.userprefs
+**/*.sln.cache
+**/*.csproj.user
+
+# NuGet
+**/packages/
+**/.nuget/
+**/nuget.exe
+*.nupkg
+*.snupkg
+**/nuget.config
+
+# Native AOT / Publish outputs
+**/publish/
+**/artifacts/
+**/*.aot
+**/*.native
+**/*.so
+**/*.dylib
+**/*.dll
+**/*.exe
+**/*.pdb
+
+# ========================
+# Visual Studio / Rider / VS Code
+# ========================
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+*.tmp
+*.log
+.vs/
+_ReSharper*/
+**/*.DotSettings.user
+
+# ========================
+# Test & Coverage
+# ========================
+**/TestResults/
+**/coverage/
+**/*.coverage
+**/*.cobertura.xml
+**/*.opencover.xml
+
+# ========================
+# Documentation & Book
+# ========================
+docs/_site/
+docs/_build/
+docs/book/_site/
+docs/**/*.html
+docs/**/*.pdf
+
+# ========================
+# Examples & Binaries
+# ========================
+examples/**/bin/
+examples/**/obj/
+examples/**/publish/
+examples/**/artifacts/
+
+# ========================
+# Temporary / Local files
+# ========================
+.DS_Store
+Thumbs.db
+*.lock
+*.tmp
+*.cache
+*.log
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+
+# ========================
+# Tools & Scripts
+# ========================
+tools/**/bin/
+tools/**/obj/
+
+# ========================
+# CI / GitHub
+# ========================
+.github/**/temp/
+.github/**/artifacts/
+
+# ========================
+# Optional: Local dev overrides
+# ========================
+# (uncomment if you need them)
+/local/
+**/launchSettings.json
+**/appsettings.*.json
+**/secrets.json
+
+# ========================
+# Explicitly allowed binaries (if any)
+# ========================
+# !**/some-required-binary.exe   # add exceptions here if needed
+
+# End of .gitignore

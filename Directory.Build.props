@@ -1,0 +1,17 @@
+<Project>
+  <!--
+    Directory.Build.props — imported BEFORE each .csproj body.
+    Put: language/TFM defaults and repo-wide settings that do NOT depend on
+    properties only set in the project file (e.g. OutputType is unreliable here).
+
+    Host-only settings (Native AOT, trim, default RID) live in Directory.Build.targets.
+  -->
+  <PropertyGroup>
+    <!-- Set TargetFramework (or TargetFrameworks) in each .csproj; C_.SDK multi-targets. -->
+    <LangVersion>14</LangVersion>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- Repo-wide: invariant culture; applies to libraries and executables. -->
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+</Project>

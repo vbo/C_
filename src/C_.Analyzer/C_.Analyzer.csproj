@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <!-- Analyzers target netstandard2.0 for broad host SDK compatibility. -->
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <LangVersion>14</LangVersion>
+    <RootNamespace>C_.Analyzer</RootNamespace>
+    <AssemblyName>C_.Analyzer</AssemblyName>
+    <IsRoslynComponent>true</IsRoslynComponent>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <!-- NuGet analyzer layout (Roslyn LSP / C# Dev Kit load this path; default pack uses lib/ which is not an analyzer package). -->
+    <PackageId>C_.Analyzer</PackageId>
+    <PackageVersion>1.0.7</PackageVersion>
+    <DevelopmentDependency>true</DevelopmentDependency>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <NoPackageAnalysis>true</NoPackageAnalysis>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
+    <!-- Reference SDK for build order; do not reference the SDK assembly (Roslyn only loads the primary analyzer DLL). -->
+    <ProjectReference Include="..\C_.SDK\C_.SDK.csproj" ReferenceOutputAssembly="false" />
+    <Compile Include="..\C_.SDK\ExemptAttribute.cs" Link="Sdk\ExemptAttribute.cs" />
+    <Compile Include="..\C_.SDK\DebugExemptAttribute.cs" Link="Sdk\DebugExemptAttribute.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="AnalyzerReleases.Unshipped.md" />
+    <AdditionalFiles Include="AnalyzerReleases.Shipped.md" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="$(OutputPath)$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+  </ItemGroup>
+</Project>

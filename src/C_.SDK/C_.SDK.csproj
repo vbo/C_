@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net10.0;netstandard2.0</TargetFrameworks>
+    <RootNamespace>C_</RootNamespace>
+    <AssemblyName>C_.SDK</AssemblyName>
+    <!-- netstandard2.0: attribute only. net10.0: all other *.cs in this folder. -->
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="ExemptAttribute.cs" />
+    <Compile Include="DebugExemptAttribute.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
+    <Compile Include="*.cs" Exclude="ExemptAttribute.cs;DebugExemptAttribute.cs" />
+  </ItemGroup>
+</Project>
