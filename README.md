@@ -1,8 +1,8 @@
-**C_**
+# C_
 
-C_ is a strict, performance-first dialect of C# designed for high-performance games and low-latency servers. It enforces zero heap allocations, statically bounded memory, and predictable execution in hot paths by treating every unmarked method as hot-path code. The language eliminates dynamic dispatch, exceptions, and any operation that could introduce GC pauses or jitter, while still providing full access to modern C# tooling and Native AOT compilation. By requiring developers to pre-allocate all persistent data and use stack-based or frame-scoped temporary memory, C_ delivers C-like control and predictability within the .NET ecosystem.
+C_ is a strict, performance-oriented dialect of C# for developers who care about predictability in low-latency servers, games, and real-time simulations. A Roslyn analyzer treats unmarked code as **hot path** and turns easy mistakes - surprise allocations, throws, interface dispatch where you didn’t mean it - into **compile-time errors**, so critical paths are less likely to feed the GC for no good reason. That isn’t a promise of zero GC in the entire process; it’s a guardrail on the code you mark as important. When startup, I/O, or debug-only work needs to break those rules, you use **`[C_.Exempt]`** or **`[C_.DebugExempt]`** with a **`Reason`** (see [docs/lang.md](docs/lang.md)).
 
-The project consists of a precise language specification, a Roslyn analyzer that enforces the rules at compile time, and a lightweight SDK containing essential zero-allocation primitives. Developers organize code using `public static partial class` modules and use explicit exemption attributes (`[C_.Exempt]` and `[C_.DebugExempt]`) only where allocations or side effects are truly necessary. C_ is intended for developers who want maximum performance and minimum surprise - code that is obviously correct, easy to reason about, and ships as small, fast native executables with no hidden runtime costs.
+You keep the productivity of C# and .NET. **`C_.Analyzer`** and the small **`C_.SDK`** library are the extra pieces; optional **Native AOT** defaults in this repo are a deployment choice, not a requirement of the dialect. The payoff is hot-path code that is easier to review and ship with confidence.
 
 ---
 
@@ -45,4 +45,4 @@ The example restores **`C_.Analyzer`** from `feed/analyzers`. If the package is 
 
 ## Who it is for
 
-Teams that want **C# productivity** for the bulk of a codebase but **hard guarantees** (or hard failures) on the frame-critical slice - without leaving the ecosystem or maintaining a private language fork.
+Teams that want **C# productivity** for the bulk of a codebase but **hard guarantees** (or hard failures) on the frame-critical slice without leaving the ecosystem or maintaining a private language fork.
