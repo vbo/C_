@@ -102,7 +102,7 @@ public static partial class Application
     [C_.Exempt(Reason = "Post-run visualization; string work and console I/O")]
     private static void ReportFinalState()
     {
-        Console.WriteLine();
+        Console.WriteLine();        
         Console.WriteLine($"Ticks simulated: {_simulationTick} (grid {GridSize}x{GridSize})");
 
         Span<char> row = stackalloc char[GridSize];

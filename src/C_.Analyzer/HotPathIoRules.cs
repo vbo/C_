@@ -10,7 +10,7 @@ internal static class HotPathIoRules
 {
     /// <summary>
     /// True if <paramref name="method"/> is a BCL entry point classified as console, network,
-    /// filesystem, pipe, or similar I/O (C_.0016).
+    /// filesystem, pipe, or similar I/O (C_0016).
     /// </summary>
     internal static bool IsDisallowedIo(IMethodSymbol method)
     {
@@ -52,7 +52,7 @@ internal static class HotPathIoRules
     }
 
     /// <summary>
-    /// True for <see cref="Console"/> members that perform read/write or standard stream access.
+    /// True for Console members that perform read/write or standard stream access.
     /// </summary>
     private static bool IsConsoleIoMethod(IMethodSymbol method) =>
         method.Name switch

@@ -13,7 +13,7 @@ Writing code in this style may feel restrictive at first, so `C_` comes with pra
 | Document | What it is |
 |----------|------------|
 | [docs/lang.md](docs/lang.md) | Specification: principles, hot-path semantics, exemptions, tooling expectations. |
-| [docs/analyzer.md](docs/analyzer.md) | Analyzer reference: rules (`C_.0001`–`C_.0018`), exemptions, BCL and third-party notes. |
+| [docs/analyzer.md](docs/analyzer.md) | Analyzer reference: rules (`C_0001`–`C_0018`), exemptions, BCL and third-party notes. |
 | [docs/guide_memory.md](docs/guide_memory.md) | Memory patterns: pre-allocated data, `stackalloc`, frame scratch, `ref struct`. |
 
 ---
@@ -24,19 +24,30 @@ Writing code in this style may feel restrictive at first, so `C_` comes with pra
 |------|------|
 | `src/C_.SDK` | Basic primitives to get you started. |
 | `src/C_.Analyzer` | Roslyn analyzer; packaged as **`C_.Analyzer`** for NuGet-style feeds. |
+| `src/C_.Analyzer.Tests` | xUnit tests: in-process **`CompilationWithAnalyzers`** over **`C_.SDK`** (see **`docs/analyzer.md`**). |
 | `examples/` | Runnable examples using C_. |
-| `Directory.Build.props` / `Directory.Build.targets` | Good defaults for your build. |
+| `C_.sln` | **Main solution:** SDK, analyzer, tests, and **`HelloC_`**. In **VS Code / Cursor**, open this solution (palette: **“.NET: Open Solution”** / pick **`C_.sln`**) so **`HelloC_`** is in the language-server workspace. |
+| `examples/Examples.sln` | **`HelloC_`** only—skip for full IDE analyzer context (see **`C_.sln`**). |
+| `Directory.Build.props` / `Directory.Build.targets` | Good defaults; **`HelloC_`** restores **`C_.Analyzer`** from **`feed/analyzers`** (packed before restore; see **Consuming**). |
+
+---
+
+## Consuming `C_.Analyzer`
+
+**In this repo,** **`HelloC_`** uses a **`PackageReference`** to **`C_.Analyzer`** at **`$(C_AnalyzerPackageVersion)`** with **`RestoreAdditionalProjectSources`** pointing at **`feed/analyzers`**. **`Directory.Build.targets`** runs **`dotnet pack`** on **`src/C_.Analyzer`** into that folder **before** **`HelloC_`** **`Restore`**, so a normal **`dotnet build`** / **`dotnet restore`** refreshes the local nupkg. This matches what **Cursor’s C# language server** expects for third-party analyzers better than a live **`ProjectReference`**. Bump **`C_AnalyzerPackageVersion`** in **`Directory.Build.props`** when you change the analyzer; nupkg files under **`feed/`** are gitignored.
+
+**Publishing / other feeds:** run **`dotnet pack src/C_.Analyzer`** (or your pipeline); the nupkg uses **`analyzers/dotnet/cs`** (see **`src/C_.Analyzer/C_.Analyzer.csproj`**).
 
 ---
 
 ## Running Examples
 
 ```bash
-dotnet build src/C_.sln -c Release
-dotnet build examples/Examples.sln -c Release
+dotnet build C_.sln -c Release
+dotnet test C_.sln -c Release --no-build
 dotnet run --project examples/HelloC_/HelloC_.csproj -c Release
 ```
 
-The example restores **`C_.Analyzer`** from `feed/analyzers`. If the package is missing, MSBuild packs `src/C_.Analyzer` into that folder on restore.
+**Note:** **`examples/Examples.sln`** does not include **`src`** projects; use it only for a minimal **`HelloC_`** build. For analyzer + example together, prefer **`C_.sln`**.
 
 ---

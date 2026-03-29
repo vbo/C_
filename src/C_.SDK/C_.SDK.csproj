@@ -3,17 +3,17 @@
     <TargetFrameworks>net10.0;netstandard2.0</TargetFrameworks>
     <RootNamespace>C_</RootNamespace>
     <AssemblyName>C_.SDK</AssemblyName>
-    <!-- netstandard2.0: attribute only. net10.0: all other *.cs in this folder. -->
+    <!-- netstandard2.0: Attributes/*.cs only. net10.0: + Memory/*.cs. -->
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="ExemptAttribute.cs" />
-    <Compile Include="DebugExemptAttribute.cs" />
-    <Compile Include="HotPathAttribute.cs" />
+    <Compile Include="Attributes\ExemptAttribute.cs" />
+    <Compile Include="Attributes\DebugExemptAttribute.cs" />
+    <Compile Include="Attributes\HotPathAttribute.cs" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
-    <Compile Include="*.cs" Exclude="ExemptAttribute.cs;DebugExemptAttribute.cs;HotPathAttribute.cs" />
+    <Compile Include="Memory\**\*.cs" />
   </ItemGroup>
 </Project>

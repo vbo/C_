@@ -5,22 +5,15 @@
 
     <RootNamespace>HelloC_</RootNamespace>
     <AssemblyName>HelloC_</AssemblyName>
-    <!-- Local feed for C_.Analyzer nupkg (Roslyn LSP expects NuGet-style analyzer packages). -->
-    <RestoreAdditionalProjectSources>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\..\feed\analyzers'))</RestoreAdditionalProjectSources>
+    <RestoreAdditionalProjectSources>$(MSBuildThisFileDirectory)..\..\feed\analyzers</RestoreAdditionalProjectSources>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\C_.SDK\C_.SDK.csproj" />
-    <PackageReference Include="C_.Analyzer" Version="1.0.7" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
+    <PackageReference Include="C_.Analyzer" Version="$(C_AnalyzerPackageVersion)">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
-  <Target Name="EnsureC_AnalyzerPackage" BeforeTargets="Restore">
-    <PropertyGroup>
-      <_C_AnalyzerFeed>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\..\feed\analyzers'))</_C_AnalyzerFeed>
-      <_C_AnalyzerNupkg>$(_C_AnalyzerFeed)\C_.Analyzer.1.0.7.nupkg</_C_AnalyzerNupkg>
-      <_C_AnalyzerProj>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\..\src\C_.Analyzer\C_.Analyzer.csproj'))</_C_AnalyzerProj>
-    </PropertyGroup>
-    <Exec Condition="!Exists('$(_C_AnalyzerNupkg)')"
-          Command="dotnet pack &quot;$(_C_AnalyzerProj)&quot; -o &quot;$(_C_AnalyzerFeed)&quot; -c Release --verbosity quiet" />
-  </Target>
 </Project>

@@ -8,7 +8,7 @@
   -->
 
   <!-- Native AOT + trimming: host executables only (libraries stay default OutputType=Library). -->
-  <PropertyGroup Condition="'$(OutputType)' == 'Exe' Or '$(OutputType)' == 'WinExe'">
+  <PropertyGroup Condition="('$(OutputType)' == 'Exe' Or '$(OutputType)' == 'WinExe') And '$(IsTestProject)' != 'true'">
     <!-- Produce a native binary via ahead-of-time compilation (no JIT at runtime). -->
     <PublishAot>true</PublishAot>
     <!-- Roslyn analyzers for trim/AOT compatibility (unreachable code, reflection traps, etc.). -->
@@ -17,10 +17,20 @@
     <TrimMode>full</TrimMode>
   </PropertyGroup>
 
-  <!-- Default RID when unset; `-r` / csproj RuntimeIdentifier overrides. -->
-  <PropertyGroup Condition="('$(OutputType)' == 'Exe' Or '$(OutputType)' == 'WinExe') And '$(RuntimeIdentifier)' == ''">
+  <!-- Default RID when unset; `-r` / csproj RuntimeIdentifier overrides. Test projects are Exe but must stay portable. -->
+  <PropertyGroup Condition="('$(OutputType)' == 'Exe' Or '$(OutputType)' == 'WinExe') And '$(RuntimeIdentifier)' == '' And '$(IsTestProject)' != 'true'">
     <RuntimeIdentifier Condition="$([MSBuild]::IsOSPlatform('Windows'))">win-x64</RuntimeIdentifier>
     <RuntimeIdentifier Condition="$([MSBuild]::IsOSPlatform('Linux'))">linux-x64</RuntimeIdentifier>
     <RuntimeIdentifier Condition="$([MSBuild]::IsOSPlatform('OSX'))">osx-arm64</RuntimeIdentifier>
   </PropertyGroup>
+
+  <!-- HelloC_: pack C_.Analyzer into feed/analyzers before restore so PackageReference resolves (Roslyn LSP). -->
+  <Target Name="PackC_AnalyzerForLocalFeed" BeforeTargets="Restore" Condition="'$(MSBuildProjectName)' == 'HelloC_'">
+    <PropertyGroup>
+      <_CAnalyzerProj>$(MSBuildThisFileDirectory)src/C_.Analyzer/C_.Analyzer.csproj</_CAnalyzerProj>
+      <_CAnalyzerFeed>$(MSBuildThisFileDirectory)feed/analyzers</_CAnalyzerFeed>
+    </PropertyGroup>
+    <MakeDir Directories="$(_CAnalyzerFeed)" />
+    <Exec Command="dotnet pack &quot;$(_CAnalyzerProj)&quot; -c Release -o &quot;$(_CAnalyzerFeed)&quot;" StandardOutputImportance="low" />
+  </Target>
 </Project>

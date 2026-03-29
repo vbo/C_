@@ -25,7 +25,7 @@ Persistent data should be allocated **once** at program start or during load pha
 - Prefer **`ref`**, **`in`**, and **`Span<T>`** at boundaries between hot-path functions.
 - Do not allocate in the main loop unless the enclosing scope is **`[C_.Exempt]`** / **`[C_.DebugExempt]`** (and you understand the Release vs Debug semantics—see **`docs/lang.md`**).
 - Use **`[C_.Exempt]`** sparingly and always with a clear **`Reason`**.
-- Do not use **`ArrayPool<T>.Shared.Rent`** on the hot path (**C_.0006**). If you need a **large** reusable scratch region, allocate a **`byte[]`** (or similar) **once** during startup and slice it each frame—see §3.3.
+- Do not use **`ArrayPool<T>.Shared.Rent`** on the hot path (**C_0006**). If you need a **large** reusable scratch region, allocate a **`byte[]`** (or similar) **once** during startup and slice it each frame—see §3.3.
 
 ---
 
@@ -116,7 +116,7 @@ Use the **same** callee shape (**`ref Span<byte>`**, **`ref int offset`**) so su
 
 Keep **`offset`** in bounds each frame. For the pool variant, you may reuse the **entire** buffer every frame (reset **`offset`** to **`0`** at the start of **`Tick`**) or partition it if multiple threads need scratch (e.g. one slab per worker, sized at startup).
 
-Do **not** substitute **`ArrayPool<T>.Shared.Rent`** in **`Tick`** for this pattern—that API is disallowed on the hot path (**C_.0006**).
+Do **not** substitute **`ArrayPool<T>.Shared.Rent`** in **`Tick`** for this pattern—that API is disallowed on the hot path (**C_0006**).
 
 If you prefer a single value type to pass around, a **`struct`** holding **`Span<byte>`** and **`int`** (cursor) is your own local type—not prescribed by this repo.
 

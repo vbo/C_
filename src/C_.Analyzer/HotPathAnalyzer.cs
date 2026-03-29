@@ -157,7 +157,7 @@ public sealed class HotPathAnalyzer : DiagnosticAnalyzer
 
     /// <summary>
     /// True if <paramref name="containingSymbol"/> is the compilation entry point or nested lexically
-    /// inside it (C_.0017 exception for <c>Main</c>).
+    /// inside it (C_0017 exception for <c>Main</c>).
     /// </summary>
     private static bool IsUnderEntryPoint(ISymbol? containingSymbol, IMethodSymbol? entryPoint)
     {
@@ -174,7 +174,7 @@ public sealed class HotPathAnalyzer : DiagnosticAnalyzer
     }
 
     /// <summary>
-    /// Handles throw, allocations, await, conversions, invocations, and C_.0017 exempt-callee checks
+    /// Handles throw, allocations, await, conversions, invocations, and C_0017 exempt-callee checks
     /// for hot-path operations.
     /// </summary>
     private static void AnalyzeOperation(
@@ -296,7 +296,7 @@ public sealed class HotPathAnalyzer : DiagnosticAnalyzer
 
     /// <summary>
     /// Reports lambdas, anonymous methods, and local functions that capture outer variables on the hot
-    /// path (C_.0011).
+    /// path (C_0011).
     /// </summary>
     private static void AnalyzeClosureSyntax(
         SyntaxNodeAnalysisContext context,
@@ -461,7 +461,7 @@ public sealed class HotPathAnalyzer : DiagnosticAnalyzer
     }
 
     /// <summary>
-    /// Type and generic-method declarations: unconstrained or interface-only type parameters (C_.0013).
+    /// Type and generic-method declarations: unconstrained or interface-only type parameters (C_0013).
     /// </summary>
     private static void AnalyzeSymbol(
         SymbolAnalysisContext context,
@@ -532,7 +532,7 @@ public sealed class HotPathAnalyzer : DiagnosticAnalyzer
     }
 
     /// <summary>
-    /// Emits C_.0013 when <paramref name="tp"/> is unconstrained or constrained only to interfaces.
+    /// Emits C_0013 when <paramref name="tp"/> is unconstrained or constrained only to interfaces.
     /// </summary>
     private static void ReportBadTypeParameter(SymbolAnalysisContext context, ITypeParameterSymbol tp, Location location)
     {

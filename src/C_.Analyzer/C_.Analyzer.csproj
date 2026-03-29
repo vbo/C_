@@ -11,7 +11,8 @@
     <AnalysisLevel>latest</AnalysisLevel>
     <!-- NuGet analyzer layout (Roslyn LSP / C# Dev Kit load this path; default pack uses lib/ which is not an analyzer package). -->
     <PackageId>C_.Analyzer</PackageId>
-    <PackageVersion>1.0.7</PackageVersion>
+    <!-- Uses $(C_AnalyzerPackageVersion) from Directory.Build.props; bump there (see README). -->
+    <PackageVersion>$(C_AnalyzerPackageVersion)</PackageVersion>
     <DevelopmentDependency>true</DevelopmentDependency>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <NoPackageAnalysis>true</NoPackageAnalysis>
@@ -22,9 +23,7 @@
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
     <!-- Reference SDK for build order; do not reference the SDK assembly (Roslyn only loads the primary analyzer DLL). -->
     <ProjectReference Include="..\C_.SDK\C_.SDK.csproj" ReferenceOutputAssembly="false" />
-    <Compile Include="..\C_.SDK\ExemptAttribute.cs" Link="Sdk\ExemptAttribute.cs" />
-    <Compile Include="..\C_.SDK\DebugExemptAttribute.cs" Link="Sdk\DebugExemptAttribute.cs" />
-    <Compile Include="..\C_.SDK\HotPathAttribute.cs" Link="Sdk\HotPathAttribute.cs" />
+    <Compile Include="..\C_.SDK\Attributes\**\*.cs" Link="Sdk\Attributes\%(RecursiveDir)%(Filename)%(Extension)" />
   </ItemGroup>
 
   <ItemGroup>

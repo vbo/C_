@@ -73,7 +73,7 @@ Hot-path code must not execute any of the following:
 
 - `throw`, throw expressions, and bare rethrow (`throw;`) are forbidden in hot paths (throwing allocates and implies exceptional control flow).
 - `catch` clauses (including `catch when (...)`) are forbidden in hot paths: exception handling is not part of the hot-path model. Use **`[C_.Exempt]`** (or **`[C_.DebugExempt]`** in Debug) for recovery or boundary code, or handle failures outside the frame loop.
-- **`finally` remains allowed** on hot paths. A `finally` block schedules **deterministic cleanup when the `try` region is left**; it does not express “recover from a failure in flight” the way `catch` does. Hot-path code must still not `throw` (§4.2, first bullet), so in compliant programs control reaches `finally` through **normal exits** from `try`, not through unwinding. Keeping `finally` permits idioms such as **`using`** and **`lock`**, which lower to `try`/`finally`, without forcing those whole call sites into **`[C_.Exempt]`**. The analyzer diagnoses **`catch`** only (**C_.0018**); it does **not** flag `finally`.
+- **`finally` remains allowed** on hot paths. A `finally` block schedules **deterministic cleanup when the `try` region is left**; it does not express “recover from a failure in flight” the way `catch` does. Hot-path code must still not `throw` (§4.2, first bullet), so in compliant programs control reaches `finally` through **normal exits** from `try`, not through unwinding. Keeping `finally` permits idioms such as **`using`** and **`lock`**, which lower to `try`/`finally`, without forcing those whole call sites into **`[C_.Exempt]`**. The analyzer diagnoses **`catch`** only (**C_0018**); it does **not** flag `finally`.
 
 ### 4.3 Reflection
 
@@ -125,7 +125,7 @@ The same targets and `Reason` property apply as for `[C_.Exempt]`, but the analy
 
 Use `[DebugExempt]` for debug-only assertions, logging, or diagnostics that must not weaken Release guarantees.
 
-**C_.0017** (hot path calling into exempt startup code) applies only to **`[Exempt]`**, not to `[DebugExempt]`: you may call a `[DebugExempt]` helper from the hot path in Debug builds; in Release builds that helper’s body must satisfy hot-path rules (or the call site must be compiled out, e.g. with `#if DEBUG`).
+**C_0017** (hot path calling into exempt startup code) applies only to **`[Exempt]`**, not to `[DebugExempt]`: you may call a `[DebugExempt]` helper from the hot path in Debug builds; in Release builds that helper’s body must satisfy hot-path rules (or the call site must be compiled out, e.g. with `#if DEBUG`).
 
 For **printf-style** helpers, combine **`[Conditional("DEBUG")]`** with **`[DebugExempt]`**: the compiler strips calls in non-`DEBUG` builds, and the analyzer treats the method body as exempt in **Debug** via `[DebugExempt]` and in **non-Debug** via `[Conditional("DEBUG")]` when `DEBUG` is undefined. See **`docs/analyzer.md`** (DebugExempt section).
 
@@ -133,7 +133,7 @@ For **printf-style** helpers, combine **`[Conditional("DEBUG")]`** with **`[Debu
 
 You may depend on libraries that are not written for C_. The analyzer only inspects **your** compilation; behavior inside a referenced **assembly** (throws, allocations) is not visible unless that code is compiled **with** the analyzer in the same project.
 
-Do **not** use **`[C_.Exempt]`** on a wrapper solely to “bless” calls from the hot path: **C_.0017** forbids unexempt hot-path code from calling into **`[Exempt]`** scopes (except from the lexical entry point). A pattern of “`[Exempt]` adapter called from `Tick`” conflicts with that rule.
+Do **not** use **`[C_.Exempt]`** on a wrapper solely to “bless” calls from the hot path: **C_0017** forbids unexempt hot-path code from calling into **`[Exempt]`** scopes (except from the lexical entry point). A pattern of “`[Exempt]` adapter called from `Tick`” conflicts with that rule.
 
 **Recommended approach:** treat the dependency as a **vetted boundary**—prefer referencing it as a **binary** (or a separate project built **without** C_.Analyzer), keep **your** hot-path call sites clean (types, dispatch, arguments), and **document** the review (library id/version, what was checked, acceptance of residual risk). For third-party **source** compiled into the same analyzer run, see **`docs/analyzer.md`** (Third-party dependencies).
 
