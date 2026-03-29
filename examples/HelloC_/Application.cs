@@ -4,6 +4,9 @@ using System.Runtime;
 
 namespace HelloC_;
 
+// This project references C_.SDK only for attributes ([C_.Exempt], [C_.DebugExempt], …). It does not use SDK
+// runtime types (e.g. C_.Memory.Arena). For a small sample that dogfoods the SDK bump allocator, see ../HelloC_SDK/.
+
 /// <summary>
 /// Self-contained sketch aligned with <c>docs/lang.md</c>, <c>docs/analyzer.md</c>, and <c>docs/guide_memory.md</c>:
 /// <list type="bullet">
@@ -134,6 +137,7 @@ public static partial class Application
         var block = scratch.Slice(offset, need);
         offset += need;
 
+        Debug.Assert(e.X is >= 0 and < GridSize && e.Y is >= 0 and < GridSize, "Telemetry bytes assume coordinates fit in one slot.");
         block[0] = (byte)e.X;
         block[1] = (byte)e.Y;
         block[2] = (byte)e.Vx;

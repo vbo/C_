@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Immutable;
-using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -478,7 +477,7 @@ public sealed class HotPathAnalyzer : DiagnosticAnalyzer
         switch (context.Symbol)
         {
             case INamedTypeSymbol nt:
-                if (!nt.Locations.Any(static l => l.IsInSource))
+                if (!HasSourceLocation(nt.Locations))
                     return;
 
                 if (!HotPathScope.IsEffectiveHotPath(
@@ -494,16 +493,14 @@ public sealed class HotPathAnalyzer : DiagnosticAnalyzer
 
                 foreach (var tp in nt.TypeParameters)
                 {
-                    var loc = nt.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax(context.CancellationToken) is TypeDeclarationSyntax tds
-                        ? tds.Identifier.GetLocation()
-                        : Location.None;
+                    var loc = LocationForTypeParameters(nt.DeclaringSyntaxReferences, context);
                     ReportBadTypeParameter(context, tp, loc);
                 }
 
                 return;
 
             case IMethodSymbol { Arity: > 0 } ms:
-                if (!ms.Locations.Any(static l => l.IsInSource))
+                if (!HasSourceLocation(ms.Locations))
                     return;
 
                 if (!HotPathScope.IsEffectiveHotPath(
@@ -519,11 +516,7 @@ public sealed class HotPathAnalyzer : DiagnosticAnalyzer
 
                 foreach (var tp in ms.TypeParameters)
                 {
-                    var loc = ms.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax(context.CancellationToken) switch
-                    {
-                        MethodDeclarationSyntax m => m.Identifier.GetLocation(),
-                        _ => Location.None
-                    };
+                    var loc = LocationForMethodTypeParameters(ms.DeclaringSyntaxReferences, context);
                     ReportBadTypeParameter(context, tp, loc);
                 }
 
@@ -534,12 +527,50 @@ public sealed class HotPathAnalyzer : DiagnosticAnalyzer
     /// <summary>
     /// Emits C_0013 when <paramref name="tp"/> is unconstrained or constrained only to interfaces.
     /// </summary>
+    private static bool HasSourceLocation(ImmutableArray<Location> locations)
+    {
+        foreach (var l in locations)
+        {
+            if (l.IsInSource)
+                return true;
+        }
+
+        return false;
+    }
+
+    private static Location LocationForTypeParameters(
+        ImmutableArray<SyntaxReference> refs,
+        SymbolAnalysisContext context)
+    {
+        if (refs.IsDefaultOrEmpty)
+            return Location.None;
+        return refs[0].GetSyntax(context.CancellationToken) is TypeDeclarationSyntax tds
+            ? tds.Identifier.GetLocation()
+            : Location.None;
+    }
+
+    private static Location LocationForMethodTypeParameters(
+        ImmutableArray<SyntaxReference> refs,
+        SymbolAnalysisContext context)
+    {
+        if (refs.IsDefaultOrEmpty)
+            return Location.None;
+        return refs[0].GetSyntax(context.CancellationToken) switch
+        {
+            MethodDeclarationSyntax m => m.Identifier.GetLocation(),
+            _ => Location.None,
+        };
+    }
+
     private static void ReportBadTypeParameter(SymbolAnalysisContext context, ITypeParameterSymbol tp, Location location)
     {
-        if (tp.ConstraintTypes.Any(ct => ct.TypeKind == TypeKind.Interface))
+        foreach (var ct in tp.ConstraintTypes)
         {
-            context.ReportDiagnostic(Diagnostic.Create(HotPathDiagnostics.BadTypeParameterConstraint, location, tp.Name));
-            return;
+            if (ct.TypeKind == TypeKind.Interface)
+            {
+                context.ReportDiagnostic(Diagnostic.Create(HotPathDiagnostics.BadTypeParameterConstraint, location, tp.Name));
+                return;
+            }
         }
 
         var hasAnyConstraint =

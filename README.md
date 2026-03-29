@@ -22,10 +22,10 @@ Writing code in this style may feel restrictive at first, so `C_` comes with pra
 
 | Path | Role |
 |------|------|
-| `src/C_.SDK` | Basic primitives to get you started. |
+| `src/C_.SDK` | Attributes on **netstandard2.0** + **net10.0**; **`C_.Memory.Arena`** and related helpers compile only for **net10.0** (not the **netstandard2.0** build). |
 | `src/C_.Analyzer` | Roslyn analyzer; packaged as **`C_.Analyzer`** for NuGet-style feeds. |
 | `src/C_.Analyzer.Tests` | xUnit tests: in-process **`CompilationWithAnalyzers`** over **`C_.SDK`** (see **`docs/analyzer.md`**). |
-| `examples/` | Runnable examples using C_. |
+| `examples/` | Runnable examples: **`HelloC_`** (attributes + manual `stackalloc` bump), **`HelloC_SDK`** (same + **`C_.Memory.Arena`**). |
 | `C_.sln` | **Main solution:** SDK, analyzer, tests, and **`HelloC_`**. In **VS Code / Cursor**, open this solution (palette: **“.NET: Open Solution”** / pick **`C_.sln`**) so **`HelloC_`** is in the language-server workspace. |
 | `examples/Examples.sln` | **`HelloC_`** only—skip for full IDE analyzer context (see **`C_.sln`**). |
 | `Directory.Build.props` / `Directory.Build.targets` | Good defaults; **`HelloC_`** restores **`C_.Analyzer`** from **`feed/analyzers`** (packed before restore; see **Consuming**). |
@@ -46,8 +46,9 @@ Writing code in this style may feel restrictive at first, so `C_` comes with pra
 dotnet build C_.sln -c Release
 dotnet test C_.sln -c Release --no-build
 dotnet run --project examples/HelloC_/HelloC_.csproj -c Release
+dotnet run --project examples/HelloC_SDK/HelloC_SDK.csproj -c Release
 ```
 
-**Note:** **`examples/Examples.sln`** does not include **`src`** projects; use it only for a minimal **`HelloC_`** build. For analyzer + example together, prefer **`C_.sln`**.
+**Note:** **`examples/Examples.sln`** lists **`HelloC_`**, **`HelloC_SDK`**, and **`C_.SDK`** (needed to build the examples). It does **not** include the analyzer or tests. For full IDE analyzer context, prefer **`C_.sln`**.
 
 ---

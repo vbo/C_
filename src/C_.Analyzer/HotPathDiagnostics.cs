@@ -74,12 +74,12 @@ internal static class HotPathDiagnostics
 
     internal static readonly DiagnosticDescriptor LinqQuery = new(
         id: "C_0007",
-        title: "LINQ query syntax not allowed on the C_ hot path",
-        messageFormat: "LINQ query syntax is not allowed on the C_ hot path without an [Exempt] or [DebugExempt] exemption",
+        title: "LINQ query/comprehension syntax not allowed on the C_ hot path",
+        messageFormat: "LINQ query syntax (from … select …) is not allowed on the C_ hot path without an [Exempt] or [DebugExempt] exemption; fluent Enumerable.* calls are not covered by this rule",
         category: "C_",
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true,
-        description: "LINQ allocates; forbidden on the hot path unless exempted.");
+        description: "Query/comprehension syntax allocates; forbidden on the hot path unless exempted. Method-chained LINQ (e.g. .Select) is intentionally not diagnosed yet.");
 
     internal static readonly DiagnosticDescriptor YieldReturn = new(
         id: "C_0008",

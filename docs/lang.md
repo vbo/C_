@@ -52,7 +52,7 @@ Async/await, asynchronous patterns, and detailed memory-management rules are def
 ### 3.3 Generics
 
 - Unconstrained type parameters (`T` with no `where` clause) are forbidden in hot-path declarations.
-- Interface constraints (`where T : ISomeInterface`) are forbidden: they imply interface dispatch on `T`.
+- Interface constraints (`where T : ISomeInterface`) are forbidden: they imply interface dispatch on `T`. (**Relaxation** — see **TODO** at end of document.)
 - Permitted constraints are those that preserve fully static resolution, such as `where T : struct`, `where T : unmanaged`, or `where T : SomeStruct` where `SomeStruct` is a concrete struct type (not substitutable via an interface call on `T`).
 
 ## 4. Hot-Path Semantics
@@ -64,7 +64,7 @@ Hot-path code must not execute any of the following:
 - `new` on any reference type
 - `string` concatenation, interpolation (`$"..."`), `string.Format`, `ToString()`
 - `ArrayPool<T>.Shared.Rent` or any operation that allocates
-- LINQ queries
+- LINQ queries (today: query/comprehension syntax in the analyzer; fluent `Enumerable.*` — see **TODO** at end of document)
 - `yield return`
 - `foreach` on any collection that allocates an enumerator
 - Any operation that results in a heap allocation (including hidden boxing)
@@ -191,3 +191,10 @@ public static partial class Application
     }
 }
 ```
+
+## TODO (tooling / specification follow-ups)
+
+The following items are **not** fully specified or implemented in the current toolchain; they are tracked for a future revision of this document and the analyzer.
+
+- **Fluent LINQ:** The analyzer today diagnoses **LINQ query/comprehension** syntax only (**C_0007**). **Method-chained** `Enumerable.*` (e.g. `.Select`, `.Where`) remains out of scope; extending the rule set or tightening §4.1 wording to match is **TODO**.
+- **C_0013 / generic constraints:** §3.3 and **C_0013** reject **any** interface in a type parameter’s constraint list. **Relaxation** (e.g. allowing `where T : struct, IDisposable`, separate diagnostic ids for unconstrained vs. interface-only, or per-parameter locations) is **TODO** and would require spec + analyzer + tests.

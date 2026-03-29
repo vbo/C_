@@ -16,6 +16,7 @@ namespace C_.Memory;
 /// stride or tail padding, use a wider or explicitly laid out struct (or a dedicated forced-alignment arena).
 /// Use <see cref="Scope(ref Arena)"/> (or <c>arena.Scope()</c> via <see cref="ArenaMemoryExtensions.Scope(ref Arena)"/>)
 /// for a lexical scope that rolls back the bump cursor on exit. Reset with <see cref="Reset"/> for the whole arena.
+/// Do not copy an <see cref="Arena"/> by value while an active scope holds a <see cref="ScopeGuard"/> tied to that instance’s cursor.
 /// <see cref="TryAlloc{T}"/> never throws. <see cref="Alloc{T}"/> throws in <c>DEBUG</c> builds when the
 /// allocation fails; in non-<c>DEBUG</c> builds failed <see cref="Alloc{T}"/> returns <see cref="Span{T}.Empty"/>.
 /// </summary>
@@ -107,6 +108,8 @@ public ref struct Arena
             if (count < 0)
                 throw new ArgumentOutOfRangeException(nameof(count));
             throw new InvalidOperationException("Arena backing span does not have enough space for the allocation.");
+#else
+            return Span<T>.Empty;
 #endif
         }
 

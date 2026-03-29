@@ -51,6 +51,10 @@ Override a subtree:
 c_.default_scope = hot
 ```
 
+### Partial types and mixed EditorConfig (footgun)
+
+If **any** `partial` declaration of a **containing** named type lives in a file whose merged scope is **strict** (`hot` or unset), the analyzer can treat **nested** types and members as on the hot path **even when** their own source file is entirely under `c_.default_scope = exempt`. That keeps behavior consistent (one “hot” part pulls scrutiny into the whole type) but is easy to miss on large partial types split across folders. **Mitigation:** align EditorConfig across all parts of a partial type, or split into separate non-partial types at a boundary you control.
+
 ---
 
 ## `[HotPath]` (`C_.HotPath`)
@@ -138,6 +142,8 @@ Calls that appear **inside the compilation entry point** (Roslyn `Compilation.Ge
 
 Calls from **other** unexempt methods into `[Exempt]` code still report **C_0017**. Keep `Main` thin if you rely on this exception.
 
+**Hosting note:** The exception follows Roslyn’s **`Compilation.GetEntryPoint`**. Custom hosts, atypical entry wiring, or source generators that change how the entry symbol is modeled may not match the “thin `Main` calls `[Exempt]` startup” mental model—verify for your build pipeline.
+
 ---
 
 ## Rule C_0016: I/O on the hot path
@@ -179,7 +185,7 @@ These apply on the **hot path** unless the enclosing scope is exempt via `[Exemp
 | **C_0004** | Syntax | String concatenation with `+` when either operand is `string`. |
 | **C_0005** | Invocation | `string.Format`. |
 | **C_0006** | Invocation | `ArrayPool<>.Shared.Rent` (`System.Buffers`). |
-| **C_0007** | Syntax | LINQ query syntax. |
+| **C_0007** | Syntax | LINQ **query/comprehension** syntax (`from` / `select`). **Method-chained** `.Select`/`.Where` etc. are **not** diagnosed yet. |
 | **C_0008** | Syntax | `yield return`. |
 | **C_0009** | Operation | `await`. |
 | **C_0010** | Invocation | `object.GetType()`; any invocation on `System.Reflection.*`; `System.Activator`; `System.Runtime.InteropServices.Marshal`. |
