@@ -13,7 +13,8 @@ Writing code in this style may feel restrictive at first, so `C_` comes with pra
 | Document | What it is |
 |----------|------------|
 | [docs/lang.md](docs/lang.md) | Specification: principles, hot-path semantics, exemptions, tooling expectations. |
-| [docs/analyzer.md](docs/analyzer.md) | Analyzer reference: rules (`C_0001`–`C_0018`), exemptions, BCL and third-party notes. |
+| [docs/analyzer.md](docs/analyzer.md) | Analyzer reference: hot-path **`C_0001`–`C_0018`**, SDK **`C_SDK0001`–`C_SDK0002`**, exemptions, BCL notes. |
+| [docs/sdk.md](docs/sdk.md) | **C_.SDK**: attributes, **`C_.Memory.Arena`**, **`C_SDK*`** rules, TFMs, examples. |
 | [docs/guide_memory.md](docs/guide_memory.md) | Memory patterns: pre-allocated data, `stackalloc`, frame scratch, `ref struct`. |
 
 ---
@@ -25,9 +26,9 @@ Writing code in this style may feel restrictive at first, so `C_` comes with pra
 | `src/C_.SDK` | Attributes on **netstandard2.0** + **net10.0**; **`C_.Memory.Arena`** and related helpers compile only for **net10.0** (not the **netstandard2.0** build). |
 | `src/C_.Analyzer` | Roslyn analyzer; packaged as **`C_.Analyzer`** for NuGet-style feeds. |
 | `src/C_.Analyzer.Tests` | xUnit tests: in-process **`CompilationWithAnalyzers`** over **`C_.SDK`** (see **`docs/analyzer.md`**). |
-| `examples/` | Runnable examples: **`HelloC_`** (attributes + manual `stackalloc` bump), **`HelloC_SDK`** (same + **`C_.Memory.Arena`**). |
+| `examples/` | Runnable examples: **`HelloC_`** (attributes + manual `stackalloc` bump), **`HelloC_SDK`** (same + **`C_.Memory.Arena`** from **`C_.SDK`**). |
 | `C_.sln` | **Main solution:** SDK, analyzer, tests, and **`HelloC_`**. In **VS Code / Cursor**, open this solution (palette: **“.NET: Open Solution”** / pick **`C_.sln`**) so **`HelloC_`** is in the language-server workspace. |
-| `examples/Examples.sln` | **`HelloC_`** only—skip for full IDE analyzer context (see **`C_.sln`**). |
+| `examples/Examples.sln` | **`HelloC_`**, **`HelloC_SDK`**, **`C_.SDK`** — no analyzer/tests; for full IDE context use **`C_.sln`**. |
 | `Directory.Build.props` / `Directory.Build.targets` | Good defaults; **`HelloC_`** restores **`C_.Analyzer`** from **`feed/analyzers`** (packed before restore; see **Consuming**). |
 
 ---

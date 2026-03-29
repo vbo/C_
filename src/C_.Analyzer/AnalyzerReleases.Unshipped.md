@@ -23,3 +23,5 @@ C_0015 | C_ | Error | `ToString` on the hot path (§4.1).
 C_0016 | C_ | Error | I/O on the hot path: `System.Net.*`, filesystem/pipes/ports, `Console` read/write (§4.1).
 C_0017 | C_ | Error | Hot path must not call code marked `[Exempt]` (`[DebugExempt]` ignored for C_0017; docs/lang.md sec. 8).
 C_0018 | C_ | Error | `catch` (including `catch when`) on the hot path (§4.2).
+C_SDK0001 | C_SDK | Error | By-value copy of `C_.Memory.Arena` (assignment, argument, return, field initializer, `?:`, `??`, `switch` expression); breaks `ScopeGuard` vs. bump cursor.
+C_SDK0002 | C_SDK | Error | `Arena` must not be an instance/static field or property on a class, struct, or ref struct.

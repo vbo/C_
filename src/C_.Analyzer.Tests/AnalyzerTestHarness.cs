@@ -7,7 +7,8 @@ using Microsoft.CodeAnalysis.Diagnostics;
 namespace C_.Analyzer.Tests;
 
 /// <summary>
-/// Builds compilations with platform references + C_.SDK, runs <see cref="HotPathAnalyzer"/>, and optional per-tree editorconfig.
+/// Builds compilations with platform references + C_.SDK, runs <see cref="HotPathAnalyzer"/>,
+/// <see cref="ArenaCopyAnalyzer"/>, and <see cref="ArenaFieldAnalyzer"/>, and optional per-tree editorconfig.
 /// </summary>
 internal static class AnalyzerTestHarness
 {
@@ -64,7 +65,10 @@ internal static class AnalyzerTestHarness
             : new AnalyzerOptions(ImmutableArray<AdditionalText>.Empty, optionsProvider);
 
         var withAnalyzers = comp.WithAnalyzers(
-            ImmutableArray.Create<DiagnosticAnalyzer>(new HotPathAnalyzer()),
+            ImmutableArray.Create<DiagnosticAnalyzer>(
+                new HotPathAnalyzer(),
+                new ArenaCopyAnalyzer(),
+                new ArenaFieldAnalyzer()),
             analyzerOptions);
 
         return await withAnalyzers.GetAnalyzerDiagnosticsAsync().ConfigureAwait(false);

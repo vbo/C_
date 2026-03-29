@@ -4,11 +4,11 @@
 
 Language background and rationale live in **`docs/lang.md`**; this document describes **what the analyzer checks** and **how** exemptions work.
 
-**Rule IDs** are **`C_0001`**–**`C_0018`** (underscore, **no** dot before the digits). Roslyn treats the id as a single identifier; forms like **`C_.0002`** are rejected at report time (**`AD0001`**, analyzer throws, no squiggles). Use **`C_0001`**… in **`.editorconfig`**, **`#pragma`**, and release notes.
+**Hot-path rule IDs** are **`C_0001`**–**`C_0018`** (category **`C_`**). **SDK contract IDs** for **`C_.Memory.Arena`** are **`C_SDK0001`** and **`C_SDK0002`** (category **`C_SDK`**). Use an underscore, **no** dot before the digits. Roslyn treats each id as a single identifier; forms like **`C_.0002`** are rejected at report time (**`AD0001`**, analyzer throws, no squiggles). Use these ids in **`.editorconfig`**, **`#pragma`**, and release notes.
 
 **VS Code / Cursor:** open repo-root **`C_.sln`** (see **`README.md`**) so **`HelloC_`** is in the workspace. **`HelloC_`** consumes **`C_.Analyzer`** via **`PackageReference`** and a **local feed** under **`feed/analyzers`** (packed automatically before **`HelloC_`** restore). Restart the language server if diagnostics lag after changing the analyzer.
 
-**Tests:** **`src/C_.Analyzer.Tests`** runs **`HotPathAnalyzer`** with Roslyn **`CompilationWithAnalyzers`** (Microsoft.CodeAnalysis.CSharp 4.14, same as the analyzer). Synthetic compilations reference **`C_.SDK`** and **platform assemblies** from **`TRUSTED_PLATFORM_ASSEMBLIES`**, excluding **`C_.Analyzer.dll`** so **`Exempt`** / **`HotPath`** attributes bind to the SDK only (the test host loads the analyzer assembly, which would otherwise duplicate **`C_.*Attribute`** types). Sources are prefixed with **`using C_;`**; use **`[Exempt]`**, **`[DebugExempt]`**, **`[HotPath]`** in test snippets (not **`[ExemptAttribute]`**, which would look for **`ExemptAttributeAttribute`**).
+**Tests:** **`src/C_.Analyzer.Tests`** runs **`HotPathAnalyzer`**, **`ArenaCopyAnalyzer`**, and **`ArenaFieldAnalyzer`** with Roslyn **`CompilationWithAnalyzers`** (Microsoft.CodeAnalysis.CSharp 4.14, same as the analyzer). Synthetic compilations reference **`C_.SDK`** and **platform assemblies** from **`TRUSTED_PLATFORM_ASSEMBLIES`**, excluding **`C_.Analyzer.dll`** so **`Exempt`** / **`HotPath`** attributes bind to the SDK only (the test host loads the analyzer assembly, which would otherwise duplicate **`C_.*Attribute`** types). Sources are prefixed with **`using C_;`**; use **`[Exempt]`**, **`[DebugExempt]`**, **`[HotPath]`** in test snippets (not **`[ExemptAttribute]`**, which would look for **`ExemptAttributeAttribute`**).
 
 Note on **BCL**s: Short for **Base Class Library** — the core .NET libraries that ship **with the runtime** (framework assemblies such as `System.Runtime`, `System.Collections`, `System.Net.*`, `System.Console`, and the rest of the shared-framework surface you get with the SDK). It does **not** mean “any NuGet package” or your own assemblies. In this doc, **“BCL patterns”** (e.g. for **C_0016**) means the concrete namespaces and types the analyzer’s blocklists target in those libraries; **“non–BCL”** means other assemblies (your projects, third-party packages, private DLLs).
 
@@ -173,6 +173,26 @@ Third-party libraries, `Process`, waits, and many other blocking or I/O-like API
 
 ---
 
+## Rules `C_SDK0001` & `C_SDK0002` (`C_.Memory.Arena`)
+
+These are reported by **`ArenaCopyAnalyzer`** and **`ArenaFieldAnalyzer`**, not **`HotPathAnalyzer`**. They apply to **any** source in a compilation that resolves **`C_.Memory.Arena`** (when the SDK **`net10.0`** surface is referenced), **independent** of hot-path vs exempt scope.
+
+### `C_SDK0001`: do not copy `Arena` by value
+
+By-value assignment, arguments, returns, and similar operations **duplicate** the bump cursor while **sharing** the backing **`Span<byte>`**, which breaks **`Arena.ScopeGuard`** rollback and allocation bookkeeping.
+
+**Covered patterns (current implementation):** simple assignment, variable declarators with initializer, by-value arguments, by-value returns, single-field initializers, and **conditional**, **null-coalescing**, and **switch-expression** forms when any branch copies an existing arena instance. **`new Arena(...)`**, **`default`**, **`ref` / `in` / `out` parameters**, and **`Arena.Scope(ref arena)`** are not reported as copies.
+
+**Gaps:** copies through **transitive** embedding (struct whose field is another struct that contains **`Arena`**), **opaque** invocations, **dynamic**, or code the analyzer does not model are not diagnosed. Treat **`C_SDK0001`** as **project policy lint**, not a guarantee.
+
+### `C_SDK0002`: no `Arena` fields or properties on types
+
+**`Arena`** must not be an instance or static **field**, and not a **property** of type **`Arena`** except when diagnosed via the compiler’s associated backing field (auto-properties). See **`docs/sdk.md`** §2.4.
+
+Full **`Arena`** ergonomics and rationale are in **`docs/sdk.md`** §2.
+
+---
+
 ## Rules C_0001–C_0015 & C_0018 (summary)
 
 These apply on the **hot path** unless the enclosing scope is exempt via `[Exempt]` or (in DEBUG builds) `[DebugExempt]`. **C_0013** is evaluated on **declarations** (types and generic methods) and does not use the same “operation in exempt body” shortcut for the type-parameter rules.
@@ -195,6 +215,8 @@ These apply on the **hot path** unless the enclosing scope is exempt via `[Exemp
 | **C_0014** | Operation | Implicit boxing (value type to reference). |
 | **C_0015** | Invocation | Instance `ToString()` with no parameters. |
 | **C_0018** | Syntax | `catch` / `catch when` on the hot path (`try`/`finally` without `catch` is allowed). |
+
+**`C_SDK0001`** / **`C_SDK0002`** are documented above (SDK **`Arena`** rules; not hot-path–scoped).
 
 **`finally`:** The analyzer does **not** report `finally`. Rationale: `finally` is for **deterministic cleanup** on leaving `try`, not for **exception recovery**; with **no `throw`** on the hot path, compliant code uses it for normal-exit teardown and for language sugar (`using`, `lock`). See **`docs/lang.md` §4.2** for the full decision.
 

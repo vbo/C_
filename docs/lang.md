@@ -7,6 +7,8 @@ C_ is a strict dialect of C# designed for high-performance, latency-critical app
 
 The dialect is enforced by a custom Roslyn analyzer. Violations in hot-path code are compile-time errors unless explicitly exempted.
 
+See also: **`C_.SDK`** library (attributes, useful primitives) is documented in **`docs/sdk.md`**.
+
 ## 1. Language Principles
 
 1. **Hot-Path Default**  

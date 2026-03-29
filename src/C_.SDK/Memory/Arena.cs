@@ -17,6 +17,7 @@ namespace C_.Memory;
 /// Use <see cref="Scope(ref Arena)"/> (or <c>arena.Scope()</c> via <see cref="ArenaMemoryExtensions.Scope(ref Arena)"/>)
 /// for a lexical scope that rolls back the bump cursor on exit. Reset with <see cref="Reset"/> for the whole arena.
 /// Do not copy an <see cref="Arena"/> by value while an active scope holds a <see cref="ScopeGuard"/> tied to that instance’s cursor.
+/// The C_ analyzer reports by-value copies as <c>C_SDK0001</c> and forbids fields/properties as <c>C_SDK0002</c> (see <c>docs/sdk.md</c>).
 /// <see cref="TryAlloc{T}"/> never throws. <see cref="Alloc{T}"/> throws in <c>DEBUG</c> builds when the
 /// allocation fails; in non-<c>DEBUG</c> builds failed <see cref="Alloc{T}"/> returns <see cref="Span{T}.Empty"/>.
 /// </summary>

@@ -5,7 +5,7 @@ Any unmarked method is treated as **hot path**; **`C_.Analyzer`** reports heap a
 
 Normative rules and exemptions are in **`docs/lang.md`**; what the analyzer flags is in **`docs/analyzer.md`**. This guide is **patterns and ergonomics**, not a substitute for those documents.
 
-A future **optional SDK** doc may introduce reusable buffer and string helpers. **This guide stays self-contained** using ordinary C#, **`Span<T>`**, arrays, and small types you can define locally.
+Reusable bump allocation for **`net10.0`** lives in **`C_.Memory.Arena`** — see **`docs/sdk.md`**. **This guide stays useful** without the SDK, using ordinary C#, **`Span<T>`**, arrays, and small types you can define locally.
 
 ---
 
