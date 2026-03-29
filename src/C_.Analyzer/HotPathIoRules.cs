@@ -3,9 +3,15 @@ using Microsoft.CodeAnalysis;
 
 namespace C_.Analyzer;
 
-/// <summary>Detects BCL entry points that perform console, network, filesystem, pipe, or serial I/O.</summary>
+/// <summary>
+/// Detects BCL entry points that perform console, network, filesystem, pipe, or serial I/O.
+/// </summary>
 internal static class HotPathIoRules
 {
+    /// <summary>
+    /// True if <paramref name="method"/> is a BCL entry point classified as console, network,
+    /// filesystem, pipe, or similar I/O (C_.0016).
+    /// </summary>
     internal static bool IsDisallowedIo(IMethodSymbol method)
     {
         var type = method.ContainingType;
@@ -45,6 +51,9 @@ internal static class HotPathIoRules
         return false;
     }
 
+    /// <summary>
+    /// True for <see cref="Console"/> members that perform read/write or standard stream access.
+    /// </summary>
     private static bool IsConsoleIoMethod(IMethodSymbol method) =>
         method.Name switch
         {

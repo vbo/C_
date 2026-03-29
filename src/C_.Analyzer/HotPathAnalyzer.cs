@@ -9,11 +9,18 @@ using Microsoft.CodeAnalysis.Operations;
 
 namespace C_.Analyzer;
 
+/// <summary>
+/// Enforces C_ hot-path rules: allocations, I/O, reflection, dispatch, exemptions, and related
+/// diagnostics.
+/// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class HotPathAnalyzer : DiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => HotPathDiagnostics.All;
 
+    /// <summary>
+    /// Registers operation, symbol, and syntax callbacks for hot-path analysis.
+    /// </summary>
     public override void Initialize(AnalysisContext context)
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
@@ -26,10 +33,20 @@ public sealed class HotPathAnalyzer : DiagnosticAnalyzer
             var debugExemptAttr = ExemptMetadata.GetDebugExemptAttributeType(compilation);
             var compilationDefinesDebug = ExemptMetadata.CompilationDefinesDebug(compilation);
             var systemConditionalAttr = ExemptMetadata.GetSystemConditionalAttributeType(compilation);
+            var hotPathAttr = ExemptMetadata.GetHotPathAttributeType(compilation);
             var entryPoint = compilation.GetEntryPoint(compilationStart.CancellationToken);
+            var configProvider = compilationStart.Options.AnalyzerConfigOptionsProvider;
 
             compilationStart.RegisterOperationAction(
-                c => AnalyzeOperation(c, exemptAttr, debugExemptAttr, systemConditionalAttr, compilationDefinesDebug, entryPoint),
+                c => AnalyzeOperation(
+                    c,
+                    exemptAttr,
+                    debugExemptAttr,
+                    systemConditionalAttr,
+                    compilationDefinesDebug,
+                    entryPoint,
+                    configProvider,
+                    hotPathAttr),
                 OperationKind.Throw,
                 OperationKind.ObjectCreation,
                 OperationKind.ArrayCreation,
@@ -40,19 +57,40 @@ public sealed class HotPathAnalyzer : DiagnosticAnalyzer
                 OperationKind.Conversion);
 
             compilationStart.RegisterSymbolAction(
-                c => AnalyzeSymbol(c, exemptAttr, debugExemptAttr, systemConditionalAttr, compilationDefinesDebug),
+                c => AnalyzeSymbol(
+                    c,
+                    exemptAttr,
+                    debugExemptAttr,
+                    systemConditionalAttr,
+                    compilationDefinesDebug,
+                    configProvider,
+                    hotPathAttr),
                 SymbolKind.NamedType,
                 SymbolKind.Method);
 
             compilationStart.RegisterSyntaxNodeAction(
-                c => AnalyzeSyntaxNode(c, exemptAttr, debugExemptAttr, systemConditionalAttr, compilationDefinesDebug),
+                c => AnalyzeSyntaxNode(
+                    c,
+                    exemptAttr,
+                    debugExemptAttr,
+                    systemConditionalAttr,
+                    compilationDefinesDebug,
+                    configProvider,
+                    hotPathAttr),
                 SyntaxKind.QueryExpression,
                 SyntaxKind.YieldReturnStatement,
                 SyntaxKind.AddExpression,
                 SyntaxKind.CatchClause);
 
             compilationStart.RegisterSyntaxNodeAction(
-                c => AnalyzeClosureSyntax(c, exemptAttr, debugExemptAttr, systemConditionalAttr, compilationDefinesDebug),
+                c => AnalyzeClosureSyntax(
+                    c,
+                    exemptAttr,
+                    debugExemptAttr,
+                    systemConditionalAttr,
+                    compilationDefinesDebug,
+                    configProvider,
+                    hotPathAttr),
                 SyntaxKind.SimpleLambdaExpression,
                 SyntaxKind.ParenthesizedLambdaExpression,
                 SyntaxKind.AnonymousMethodExpression,
@@ -60,44 +98,67 @@ public sealed class HotPathAnalyzer : DiagnosticAnalyzer
         });
     }
 
+    /// <summary>
+    /// True if the operation’s containing symbol is analyzed as hot path (see
+    /// <see cref="HotPathScope.IsEffectiveHotPath"/>).
+    /// </summary>
     private static bool IsHotPath(
         OperationAnalysisContext context,
         INamedTypeSymbol? exemptAttr,
         INamedTypeSymbol? debugExemptAttr,
         INamedTypeSymbol? systemConditionalAttr,
-        bool compilationDefinesDebug)
+        INamedTypeSymbol? hotPathAttr,
+        bool compilationDefinesDebug,
+        AnalyzerConfigOptionsProvider configProvider)
     {
         if (exemptAttr is null && debugExemptAttr is null)
             return false;
 
-        return !ExemptMetadata.SymbolOrAncestorsExempt(
+        return HotPathScope.IsEffectiveHotPath(
             context.ContainingSymbol,
+            context.Operation.Syntax.SyntaxTree,
+            configProvider,
             exemptAttr,
             debugExemptAttr,
             systemConditionalAttr,
+            hotPathAttr,
             compilationDefinesDebug);
     }
 
+    /// <summary>
+    /// True if the syntax node’s enclosing symbol is analyzed as hot path (see
+    /// <see cref="HotPathScope.IsEffectiveHotPath"/>).
+    /// </summary>
     private static bool IsHotPath(
         SyntaxNodeAnalysisContext context,
         INamedTypeSymbol? exemptAttr,
         INamedTypeSymbol? debugExemptAttr,
         INamedTypeSymbol? systemConditionalAttr,
-        bool compilationDefinesDebug)
+        INamedTypeSymbol? hotPathAttr,
+        bool compilationDefinesDebug,
+        AnalyzerConfigOptionsProvider configProvider)
     {
         if (exemptAttr is null && debugExemptAttr is null)
             return false;
 
         var model = context.SemanticModel;
         var symbol = model.GetEnclosingSymbol(context.Node.SpanStart, context.CancellationToken);
-        return symbol is not null && !ExemptMetadata.SymbolOrAncestorsExempt(
-            symbol,
-            exemptAttr,
-            debugExemptAttr,
-            systemConditionalAttr,
-            compilationDefinesDebug);
+        return symbol is not null
+            && HotPathScope.IsEffectiveHotPath(
+                symbol,
+                context.Node.SyntaxTree,
+                configProvider,
+                exemptAttr,
+                debugExemptAttr,
+                systemConditionalAttr,
+                hotPathAttr,
+                compilationDefinesDebug);
     }
 
+    /// <summary>
+    /// True if <paramref name="containingSymbol"/> is the compilation entry point or nested lexically
+    /// inside it (C_.0017 exception for <c>Main</c>).
+    /// </summary>
     private static bool IsUnderEntryPoint(ISymbol? containingSymbol, IMethodSymbol? entryPoint)
     {
         if (entryPoint is null || containingSymbol is null)
@@ -112,16 +173,29 @@ public sealed class HotPathAnalyzer : DiagnosticAnalyzer
         return false;
     }
 
+    /// <summary>
+    /// Handles throw, allocations, await, conversions, invocations, and C_.0017 exempt-callee checks
+    /// for hot-path operations.
+    /// </summary>
     private static void AnalyzeOperation(
         OperationAnalysisContext context,
         INamedTypeSymbol? exemptAttr,
         INamedTypeSymbol? debugExemptAttr,
         INamedTypeSymbol? systemConditionalAttr,
         bool compilationDefinesDebug,
-        IMethodSymbol? entryPoint)
+        IMethodSymbol? entryPoint,
+        AnalyzerConfigOptionsProvider configProvider,
+        INamedTypeSymbol? hotPathAttr)
     {
         var op = context.Operation;
-        var callerHot = IsHotPath(context, exemptAttr, debugExemptAttr, systemConditionalAttr, compilationDefinesDebug);
+        var callerHot = IsHotPath(
+            context,
+            exemptAttr,
+            debugExemptAttr,
+            systemConditionalAttr,
+            hotPathAttr,
+            compilationDefinesDebug,
+            configProvider);
         var forbidMarkedCallee = callerHot && !IsUnderEntryPoint(context.ContainingSymbol, entryPoint);
 
         if (forbidMarkedCallee && exemptAttr is not null)
@@ -220,14 +294,27 @@ public sealed class HotPathAnalyzer : DiagnosticAnalyzer
         }
     }
 
+    /// <summary>
+    /// Reports lambdas, anonymous methods, and local functions that capture outer variables on the hot
+    /// path (C_.0011).
+    /// </summary>
     private static void AnalyzeClosureSyntax(
         SyntaxNodeAnalysisContext context,
         INamedTypeSymbol? exemptAttr,
         INamedTypeSymbol? debugExemptAttr,
         INamedTypeSymbol? systemConditionalAttr,
-        bool compilationDefinesDebug)
+        bool compilationDefinesDebug,
+        AnalyzerConfigOptionsProvider configProvider,
+        INamedTypeSymbol? hotPathAttr)
     {
-        if (!IsHotPath(context, exemptAttr, debugExemptAttr, systemConditionalAttr, compilationDefinesDebug))
+        if (!IsHotPath(
+                context,
+                exemptAttr,
+                debugExemptAttr,
+                systemConditionalAttr,
+                hotPathAttr,
+                compilationDefinesDebug,
+                configProvider))
             return;
 
         if (context.SemanticModel is not { } model)
@@ -249,6 +336,10 @@ public sealed class HotPathAnalyzer : DiagnosticAnalyzer
         }
     }
 
+    /// <summary>
+    /// Hot-path checks for I/O, string APIs, reflection, <see cref="ArrayPool{T}"/>, interface
+    /// dispatch, and related invocation patterns.
+    /// </summary>
     private static void AnalyzeInvocation(OperationAnalysisContext context, IInvocationOperation inv)
     {
         var method = inv.TargetMethod;
@@ -320,14 +411,27 @@ public sealed class HotPathAnalyzer : DiagnosticAnalyzer
         }
     }
 
+    /// <summary>
+    /// Syntax-only rules: LINQ queries, <c>yield return</c>, string <c>+</c>, and <c>catch</c> on the hot
+    /// path.
+    /// </summary>
     private static void AnalyzeSyntaxNode(
         SyntaxNodeAnalysisContext context,
         INamedTypeSymbol? exemptAttr,
         INamedTypeSymbol? debugExemptAttr,
         INamedTypeSymbol? systemConditionalAttr,
-        bool compilationDefinesDebug)
+        bool compilationDefinesDebug,
+        AnalyzerConfigOptionsProvider configProvider,
+        INamedTypeSymbol? hotPathAttr)
     {
-        if (!IsHotPath(context, exemptAttr, debugExemptAttr, systemConditionalAttr, compilationDefinesDebug))
+        if (!IsHotPath(
+                context,
+                exemptAttr,
+                debugExemptAttr,
+                systemConditionalAttr,
+                hotPathAttr,
+                compilationDefinesDebug,
+                configProvider))
             return;
 
         switch (context.Node)
@@ -356,12 +460,17 @@ public sealed class HotPathAnalyzer : DiagnosticAnalyzer
         }
     }
 
+    /// <summary>
+    /// Type and generic-method declarations: unconstrained or interface-only type parameters (C_.0013).
+    /// </summary>
     private static void AnalyzeSymbol(
         SymbolAnalysisContext context,
         INamedTypeSymbol? exemptAttr,
         INamedTypeSymbol? debugExemptAttr,
         INamedTypeSymbol? systemConditionalAttr,
-        bool compilationDefinesDebug)
+        bool compilationDefinesDebug,
+        AnalyzerConfigOptionsProvider configProvider,
+        INamedTypeSymbol? hotPathAttr)
     {
         if (exemptAttr is null && debugExemptAttr is null)
             return;
@@ -372,7 +481,15 @@ public sealed class HotPathAnalyzer : DiagnosticAnalyzer
                 if (!nt.Locations.Any(static l => l.IsInSource))
                     return;
 
-                if (ExemptMetadata.SymbolOrAncestorsExempt(nt, exemptAttr, debugExemptAttr, systemConditionalAttr, compilationDefinesDebug))
+                if (!HotPathScope.IsEffectiveHotPath(
+                        nt,
+                        syntaxTree: null,
+                        configProvider,
+                        exemptAttr,
+                        debugExemptAttr,
+                        systemConditionalAttr,
+                        hotPathAttr,
+                        compilationDefinesDebug))
                     return;
 
                 foreach (var tp in nt.TypeParameters)
@@ -389,7 +506,15 @@ public sealed class HotPathAnalyzer : DiagnosticAnalyzer
                 if (!ms.Locations.Any(static l => l.IsInSource))
                     return;
 
-                if (ExemptMetadata.SymbolOrAncestorsExempt(ms, exemptAttr, debugExemptAttr, systemConditionalAttr, compilationDefinesDebug))
+                if (!HotPathScope.IsEffectiveHotPath(
+                        ms,
+                        syntaxTree: null,
+                        configProvider,
+                        exemptAttr,
+                        debugExemptAttr,
+                        systemConditionalAttr,
+                        hotPathAttr,
+                        compilationDefinesDebug))
                     return;
 
                 foreach (var tp in ms.TypeParameters)
@@ -406,6 +531,9 @@ public sealed class HotPathAnalyzer : DiagnosticAnalyzer
         }
     }
 
+    /// <summary>
+    /// Emits C_.0013 when <paramref name="tp"/> is unconstrained or constrained only to interfaces.
+    /// </summary>
     private static void ReportBadTypeParameter(SymbolAnalysisContext context, ITypeParameterSymbol tp, Location location)
     {
         if (tp.ConstraintTypes.Any(ct => ct.TypeKind == TypeKind.Interface))

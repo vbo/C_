@@ -24,6 +24,7 @@
     <ProjectReference Include="..\C_.SDK\C_.SDK.csproj" ReferenceOutputAssembly="false" />
     <Compile Include="..\C_.SDK\ExemptAttribute.cs" Link="Sdk\ExemptAttribute.cs" />
     <Compile Include="..\C_.SDK\DebugExemptAttribute.cs" Link="Sdk\DebugExemptAttribute.cs" />
+    <Compile Include="..\C_.SDK\HotPathAttribute.cs" Link="Sdk\HotPathAttribute.cs" />
   </ItemGroup>
 
   <ItemGroup>

@@ -10,9 +10,10 @@
   <ItemGroup>
     <Compile Include="ExemptAttribute.cs" />
     <Compile Include="DebugExemptAttribute.cs" />
+    <Compile Include="HotPathAttribute.cs" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
-    <Compile Include="*.cs" Exclude="ExemptAttribute.cs;DebugExemptAttribute.cs" />
+    <Compile Include="*.cs" Exclude="ExemptAttribute.cs;DebugExemptAttribute.cs;HotPathAttribute.cs" />
   </ItemGroup>
 </Project>

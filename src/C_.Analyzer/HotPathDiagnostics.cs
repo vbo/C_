@@ -3,6 +3,10 @@ using Microsoft.CodeAnalysis;
 
 namespace C_.Analyzer;
 
+/// <summary>
+/// Diagnostic descriptors for hot-path rules; <see cref="All"/> is registered by
+/// <see cref="HotPathAnalyzer"/>.
+/// </summary>
 internal static class HotPathDiagnostics
 {
     internal static readonly DiagnosticDescriptor Throw = new(

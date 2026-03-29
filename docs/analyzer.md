@@ -10,9 +10,51 @@ Note on **BCL**s: Short for **Base Class Library** — the core .NET libraries t
 
 ## Hot path vs exempt code
 
-The analyzer treats a piece of code as **on the hot path** when the enclosing symbol (method, accessor, etc.) and its containing types **do not** carry an effective exemption (see below). Operations inside **exempt** scopes skip the allocation, I/O, and most behavioral rules; **declarations** can still be checked (for example generic constraints, **C_.0013**).
+The analyzer treats a piece of code as **on the hot path** when the enclosing symbol (method, accessor, etc.) and its containing types **do not** carry an effective exemption (see below), **and** the code is not under an **exempt-by-default** EditorConfig scope (see **Default scope**). Operations inside **exempt** scopes skip the allocation, I/O, and most behavioral rules; **declarations** can still be checked (for example generic constraints, **C_.0013**).
 
 If **both** `ExemptAttribute` and `DebugExemptAttribute` are missing from the compilation (metadata not referenced), hot-path detection does not run and those rules do not apply.
+
+---
+
+## Default scope (`c_.default_scope`)
+
+For **gradual adoption** on existing codebases, you can set a **per-file** (or directory) default via **EditorConfig** / **`.globalconfig`** merged options (Roslyn `AnalyzerConfigOptions`):
+
+| Key | Values | When unset |
+|-----|--------|------------|
+| **`c_.default_scope`** | **`exempt`** or **`hot`** | Treated as **`hot`** (strict, legacy behavior). |
+
+- **`hot`:** Same as unset: code is on the hot path unless `[Exempt]` / `[DebugExempt]` (and related rules) apply.
+- **`exempt`:** Code in that file is **not** on the hot path **unless** you opt in with **`[C_.HotPath]`** (see below) **or** any **containing named type** has a **partial declaration** in a file whose merged scope is **not** `exempt` (e.g. one part in a “hot” subtree). That way a partial type split across folders still picks up strict rules if any part lives under `c_.default_scope = hot` or default.
+
+Syntax and operation callbacks use the **merged options for the syntax tree** where the diagnostic occurs. Symbol-only rules (**C_.0013**) use the declaring symbol’s syntax trees: analysis runs only when **every** declaring tree is `exempt` default **or** opt-in / partial rules above say otherwise (same model as operations).
+
+Example at repo or solution root:
+
+```ini
+root = true
+
+[**/*.cs]
+c_.default_scope = exempt
+```
+
+Override a subtree:
+
+```ini
+[src/Hot/**/*.cs]
+c_.default_scope = hot
+```
+
+---
+
+## `[HotPath]` (`C_.HotPath`)
+
+When **`c_.default_scope = exempt`** applies, mark types or members that **should** be checked as hot path:
+
+- **Targets:** `Method`, `Class`, `Struct`
+- **Property:** `Reason` (string, optional, for review)
+
+**Opt-in** applies if **that symbol or any ancestor** (methods and named types, same walk as `[Exempt]`) has `[HotPath]`. If the default scope is **`hot`** or unset, `[HotPath]` does not relax rules; it is only useful under **`exempt`** default.
 
 ---
 
@@ -151,7 +193,7 @@ Messages and titles may cite **`docs/lang.md`** sections for the language spec.
 ## Consuming the analyzer
 
 - Reference the **`C_.Analyzer`** package (or project) as an **analyzer** so MSBuild and the IDE load it. For Visual Studio Code / C# Dev Kit, a **NuGet-style** package placing the DLL under `analyzers/dotnet/cs` is the usual path (see `examples/HelloC_` and `src/C_.Analyzer` packaging in the repo).
-- **`C_.Exempt`** and **`C_.DebugExempt`** come from **`C_.SDK`**; application code must reference the SDK assembly (or equivalent) so the attributes exist at compile time.
+- **`C_.Exempt`**, **`C_.DebugExempt`**, and **`C_.HotPath`** come from **`C_.SDK`**; application code must reference the SDK assembly (or equivalent) so the attributes exist at compile time.
 
 ---
 
