@@ -8,7 +8,7 @@
   -->
   <PropertyGroup>
     <!-- Ship version: `dotnet pack` on C_.Analyzer and in-repo HelloC_ PackageReference to local feed. -->
-    <C_AnalyzerPackageVersion>1.0.15</C_AnalyzerPackageVersion>
+    <C_AnalyzerPackageVersion>0.0.15</C_AnalyzerPackageVersion>
     <!-- Set TargetFramework (or TargetFrameworks) in each .csproj; C_.SDK multi-targets. -->
     <LangVersion>14</LangVersion>
     <Nullable>enable</Nullable>

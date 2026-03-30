@@ -1,6 +1,6 @@
 # C_ Core Language Specification
 
-**Version:** 2.6  
+**Version:** 0.15  
 **Date:** March 2026  
 
 C_ is a strict dialect of C# designed for high-performance, latency-critical applications such as games and servers. It enforces zero heap allocations in hot paths and strictly bounded memory usage.
