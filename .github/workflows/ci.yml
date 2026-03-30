@@ -16,6 +16,11 @@ jobs:
         with:
           dotnet-version: "10.0.x"
 
+      # Examples use PackageReference + feed/analyzers (not committed). Solution restore can run
+      # consumers in any order, so the feed must exist before `dotnet restore C_.sln`.
+      - name: Pack C_.Analyzer into local feed
+        run: dotnet pack src/C_.Analyzer/C_.Analyzer.csproj -c Release -o feed/analyzers
+
       - name: Restore
         run: dotnet restore C_.sln
 
