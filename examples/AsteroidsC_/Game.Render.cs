@@ -101,8 +101,10 @@ public static partial class Game
         var reg = _playerThrustOn ? SpriteSheet.PlayerThrust : SpriteSheet.PlayerIdle;
         var src = Src(reg);
         var sz = ShipSpriteSize;
-        var dest = new Rectangle(_ship.X - sz * 0.5f, _ship.Y - sz * 0.5f, sz, sz);
-        var origin = new Vector2(sz * 0.5f, sz * 0.5f);
+        var half = sz * 0.5f;
+        // DrawTexturePro places origin at (dest.x, dest.y); quad top-left is dest - origin.
+        var dest = new Rectangle(_ship.X, _ship.Y, sz, sz);
+        var origin = new Vector2(half, half);
         Raylib.DrawTexturePro(_sprites, src, dest, origin, _ship.AngleDeg + 90f, Color.RayWhite);
     }
 
@@ -118,7 +120,7 @@ public static partial class Game
             if (!b.Active)
                 continue;
 
-            var dest = new Rectangle(b.X - half, b.Y - half, sz, sz);
+            var dest = new Rectangle(b.X, b.Y, sz, sz);
             var deg = MathF.Atan2(b.Vy, b.Vx) * (180f / MathF.PI);
             Raylib.DrawTexturePro(_sprites, src, dest, new Vector2(half, half), deg, Color.RayWhite);
         }
@@ -138,8 +140,9 @@ public static partial class Game
 
             var src = Src(reg);
             var dim = a.HalfExtent * 2f;
-            var dest = new Rectangle(a.X - dim * 0.5f, a.Y - dim * 0.5f, dim, dim);
-            var origin = new Vector2(dim * 0.5f, dim * 0.5f);
+            var halfDim = dim * 0.5f;
+            var dest = new Rectangle(a.X, a.Y, dim, dim);
+            var origin = new Vector2(halfDim, halfDim);
             Raylib.DrawTexturePro(_sprites, src, dest, origin, a.SpinDeg, Color.RayWhite);
         }
     }
