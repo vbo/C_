@@ -1,0 +1,37 @@
+<Project>
+  <!--
+    Directory.Build.targets — imported AFTER the project file is evaluated.
+    Put: anything conditioned on OutputType, RuntimeIdentifier defaults, or other
+    properties set in .csproj / SDK that are not available during Directory.Build.props.
+
+    Shared language/TFM/nullable settings: Directory.Build.props.
+  -->
+
+  <!-- Native AOT + trimming: host executables only (libraries stay default OutputType=Library). -->
+  <PropertyGroup Condition="('$(OutputType)' == 'Exe' Or '$(OutputType)' == 'WinExe') And '$(IsTestProject)' != 'true'">
+    <!-- Produce a native binary via ahead-of-time compilation (no JIT at runtime). -->
+    <PublishAot>true</PublishAot>
+    <!-- Roslyn analyzers for trim/AOT compatibility (unreachable code, reflection traps, etc.). -->
+    <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+    <!-- full: aggressively remove unused IL so the published native image stays small; code must be trim-safe. -->
+    <TrimMode>full</TrimMode>
+  </PropertyGroup>
+
+  <!-- Default RID when unset; `-r` / csproj RuntimeIdentifier overrides. Test projects are Exe but must stay portable. -->
+  <PropertyGroup Condition="('$(OutputType)' == 'Exe' Or '$(OutputType)' == 'WinExe') And '$(RuntimeIdentifier)' == '' And '$(IsTestProject)' != 'true'">
+    <RuntimeIdentifier Condition="$([MSBuild]::IsOSPlatform('Windows'))">win-x64</RuntimeIdentifier>
+    <RuntimeIdentifier Condition="$([MSBuild]::IsOSPlatform('Linux'))">linux-x64</RuntimeIdentifier>
+    <RuntimeIdentifier Condition="$([MSBuild]::IsOSPlatform('OSX'))">osx-arm64</RuntimeIdentifier>
+  </PropertyGroup>
+
+  <!-- Consumer exes that reference C_.Analyzer from feed/analyzers: pack the analyzer before this project's Restore. -->
+  <!-- Include every such project (CI also pre-packs—see .github/workflows/ci.yml—for deterministic solution restore ordering). -->
+  <Target Name="PackC_AnalyzerForLocalFeed" BeforeTargets="Restore" Condition="'$(MSBuildProjectName)' == 'HelloC_' Or '$(MSBuildProjectName)' == 'HelloC_SDK' Or '$(MSBuildProjectName)' == 'AsteroidsC_'">
+    <PropertyGroup>
+      <_CAnalyzerProj>$(MSBuildThisFileDirectory)src/C_.Analyzer/C_.Analyzer.csproj</_CAnalyzerProj>
+      <_CAnalyzerFeed>$(MSBuildThisFileDirectory)feed/analyzers</_CAnalyzerFeed>
+    </PropertyGroup>
+    <MakeDir Directories="$(_CAnalyzerFeed)" />
+    <Exec Command="dotnet pack &quot;$(_CAnalyzerProj)&quot; -c Release -o &quot;$(_CAnalyzerFeed)&quot;" StandardOutputImportance="low" />
+  </Target>
+</Project>

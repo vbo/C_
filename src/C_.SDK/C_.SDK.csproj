@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net10.0;netstandard2.0</TargetFrameworks>
+    <RootNamespace>C_</RootNamespace>
+    <AssemblyName>C_.SDK</AssemblyName>
+    <!-- netstandard2.0: Attributes/*.cs only. net10.0: + Memory/*.cs. -->
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Attributes\ExemptAttribute.cs" />
+    <Compile Include="Attributes\DebugExemptAttribute.cs" />
+    <Compile Include="Attributes\HotPathAttribute.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
+    <Compile Include="Memory\**\*.cs" />
+  </ItemGroup>
+</Project>

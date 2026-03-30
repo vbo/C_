@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- References C_.SDK for attributes only; no C_.Memory types. See HelloC_SDK for Arena. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+
+    <RootNamespace>HelloC_</RootNamespace>
+    <AssemblyName>HelloC_</AssemblyName>
+    <RestoreAdditionalProjectSources>$(MSBuildThisFileDirectory)..\..\feed\analyzers</RestoreAdditionalProjectSources>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\C_.SDK\C_.SDK.csproj" />
+    <PackageReference Include="C_.Analyzer" Version="$(C_AnalyzerPackageVersion)">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+</Project>
