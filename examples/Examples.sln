@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HelloC_SDK", "HelloC_SDK\He
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "C_.SDK", "..\src\C_.SDK\C_.SDK.csproj", "{55146F2D-29A8-42DA-9AC2-5873E7514DE7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsteroidsC_", "AsteroidsC_\AsteroidsC_.csproj", "{8F3E9A1B-4C2D-4E5F-8A6B-1D2E3F4A5B6C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +57,18 @@ Global
 		{55146F2D-29A8-42DA-9AC2-5873E7514DE7}.Release|x64.Build.0 = Release|Any CPU
 		{55146F2D-29A8-42DA-9AC2-5873E7514DE7}.Release|x86.ActiveCfg = Release|Any CPU
 		{55146F2D-29A8-42DA-9AC2-5873E7514DE7}.Release|x86.Build.0 = Release|Any CPU
+		{8F3E9A1B-4C2D-4E5F-8A6B-1D2E3F4A5B6C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F3E9A1B-4C2D-4E5F-8A6B-1D2E3F4A5B6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F3E9A1B-4C2D-4E5F-8A6B-1D2E3F4A5B6C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{8F3E9A1B-4C2D-4E5F-8A6B-1D2E3F4A5B6C}.Debug|x64.Build.0 = Debug|Any CPU
+		{8F3E9A1B-4C2D-4E5F-8A6B-1D2E3F4A5B6C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{8F3E9A1B-4C2D-4E5F-8A6B-1D2E3F4A5B6C}.Debug|x86.Build.0 = Debug|Any CPU
+		{8F3E9A1B-4C2D-4E5F-8A6B-1D2E3F4A5B6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F3E9A1B-4C2D-4E5F-8A6B-1D2E3F4A5B6C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8F3E9A1B-4C2D-4E5F-8A6B-1D2E3F4A5B6C}.Release|x64.ActiveCfg = Release|Any CPU
+		{8F3E9A1B-4C2D-4E5F-8A6B-1D2E3F4A5B6C}.Release|x64.Build.0 = Release|Any CPU
+		{8F3E9A1B-4C2D-4E5F-8A6B-1D2E3F4A5B6C}.Release|x86.ActiveCfg = Release|Any CPU
+		{8F3E9A1B-4C2D-4E5F-8A6B-1D2E3F4A5B6C}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
