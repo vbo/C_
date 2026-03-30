@@ -6,7 +6,7 @@ It enforces zero heap allocations, no I/O, no exceptions, and other sources of j
 
 Writing code in this style may feel restrictive at first, so `C_` comes with practical recipes for common challenges and a lightweight SDK with decent implementation for common primitives. `C_` follows the same disciplined philosophy used in Unity DOTS, BepuPhysics, Flecs.NET, and production systems for high-frequency trading, real-time audio, and robotics. The payoff is hot-path code that is easier to review, reason about, and ship with confidence.
 
-![Tests Passing](https://github.com/vbo/C_/actions/workflows/ci.yml/badge.svg)
+[![Tests](https://github.com/vbo/C_/actions/workflows/ci.yml/badge.svg)](https://github.com/vbo/C_/actions)
 ---
 
 ## Documentation
