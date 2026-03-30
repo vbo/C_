@@ -26,10 +26,10 @@ Writing code in this style may feel restrictive at first, so `C_` comes with pra
 | `src/C_.SDK` | Attributes on **netstandard2.0** + **net10.0**; **`C_.Memory.Arena`** and related helpers compile only for **net10.0** (not the **netstandard2.0** build). |
 | `src/C_.Analyzer` | Roslyn analyzer; packaged as **`C_.Analyzer`** for NuGet-style feeds. |
 | `src/C_.Analyzer.Tests` | xUnit tests: in-process **`CompilationWithAnalyzers`** over **`C_.SDK`** (see **`docs/analyzer.md`**). |
-| `examples/` | Runnable examples: **`HelloC_`** (attributes + manual `stackalloc` bump), **`HelloC_SDK`** (same + **`C_.Memory.Arena`** from **`C_.SDK`**). |
-| `C_.sln` | **Main solution:** SDK, analyzer, tests, and **`HelloC_`**. In **VS Code / Cursor**, open this solution (palette: **“.NET: Open Solution”** / pick **`C_.sln`**) so **`HelloC_`** is in the language-server workspace. |
-| `examples/Examples.sln` | **`HelloC_`**, **`HelloC_SDK`**, **`C_.SDK`** — no analyzer/tests; for full IDE context use **`C_.sln`**. |
-| `Directory.Build.props` / `Directory.Build.targets` | Good defaults; **`HelloC_`** restores **`C_.Analyzer`** from **`feed/analyzers`** (packed before restore; see **Consuming**). |
+| `examples/` | Runnable examples: **`HelloC_`**, **`HelloC_SDK`**, **`AsteroidsC_`** (Raylib game; see **`examples/AsteroidsC_/README.md`**). |
+| `C_.sln` | **Main solution:** SDK, analyzer, tests, and examples. In **VS Code / Cursor**, open this solution (palette: **“.NET: Open Solution”** / pick **`C_.sln`**) for full analyzer + example context. |
+| `examples/Examples.sln` | **`HelloC_`**, **`HelloC_SDK`**, **`AsteroidsC_`**, **`C_.SDK`** — no analyzer/tests; for full IDE context use **`C_.sln`**. |
+| `Directory.Build.props` / `Directory.Build.targets` | Good defaults; example projects restore **`C_.Analyzer`** from **`feed/analyzers`** (packed before restore; see **Consuming** / **CI**). |
 
 ---
 
@@ -48,6 +48,7 @@ dotnet build C_.sln -c Release
 dotnet test C_.sln -c Release --no-build
 dotnet run --project examples/HelloC_/HelloC_.csproj -c Release
 dotnet run --project examples/HelloC_SDK/HelloC_SDK.csproj -c Release
+dotnet run --project examples/AsteroidsC_/AsteroidsC_.csproj -c Release
 ```
 
 **Note:** **`examples/Examples.sln`** lists **`HelloC_`**, **`HelloC_SDK`**, and **`C_.SDK`** (needed to build the examples). It does **not** include the analyzer or tests. For full IDE analyzer context, prefer **`C_.sln`**.
