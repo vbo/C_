@@ -1,5 +1,6 @@
 extern alias SdkOut;
 using System.Collections.Immutable;
+using C_.Analyzer.SDK;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -8,7 +9,7 @@ namespace C_.Analyzer.Tests;
 
 /// <summary>
 /// Builds compilations with platform references + C_.SDK, runs <see cref="HotPathAnalyzer"/>,
-/// <see cref="ArenaCopyAnalyzer"/>, and <see cref="ArenaFieldAnalyzer"/>, and optional per-tree editorconfig.
+/// <see cref="ArenaCopyAnalyzer"/> and <see cref="ArenaFieldAnalyzer"/> (namespace <c>C_.Analyzer.SDK</c>), and optional per-tree editorconfig.
 /// </summary>
 internal static class AnalyzerTestHarness
 {

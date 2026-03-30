@@ -13,7 +13,7 @@ Normative language rules and hot-path semantics are in **`docs/lang.md`**. Analy
 | **`netstandard2.0`** | Analyzer attribute resolution, older runtimes | **`C_.Exempt`**, **`C_.DebugExempt`**, **`C_.HotPath`** (under namespace **`C_`**) |
 | **`net10.0`** | Applications and libraries on modern .NET | Same attributes **plus** **`C_.Memory`** types (e.g. **`Arena`**) |
 
-The **`C_.Analyzer`** project links **attribute source files only** from the SDK so the analyzer does not load the full SDK assembly as an analyzer dependency; application projects reference **`C_.SDK`** normally.
+The **`C_.Analyzer`** project links **attribute source files only** from the SDK so the analyzer does not load the full SDK assembly as an analyzer dependency; **`C_SDK*`** rules are implemented under **`src/C_.Analyzer/SDK/`**. Application projects reference **`C_.SDK`** normally.
 
 ---
 

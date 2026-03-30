@@ -2,7 +2,7 @@ using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 
-namespace C_.Analyzer;
+namespace C_.Analyzer.SDK;
 
 /// <summary>
 /// Forbids declaring <c>C_.Memory.Arena</c> as a field or as a property whose type is <c>Arena</c> when the

@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Operations;
 
-namespace C_.Analyzer;
+namespace C_.Analyzer.SDK;
 
 /// <summary>
 /// Flags by-value copies of <c>C_.Memory.Arena</c> (assignment, locals, arguments, returns,

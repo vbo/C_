@@ -1,6 +1,6 @@
 # C_.Analyzer
 
-`C_.Analyzer` is a Roslyn **diagnostic analyzer** shipped from `src/C_.Analyzer`. It enforces **hot-path** rules for the C_ language discipline: code that is not explicitly exempt must avoid heap allocations, reflection, interface dispatch, async/iterator patterns, **`catch`** on the hot path, and I/O that the rule set recognizes.
+`C_.Analyzer` is a Roslyn **diagnostic analyzer** shipped from `src/C_.Analyzer`. **Hot-path** analyzers live at the project root (e.g. **`HotPathAnalyzer.cs`**); **SDK contract** analyzers for **`C_.Memory.Arena`** (**`C_SDK0001`**, **`C_SDK0002`**) live under **`src/C_.Analyzer/SDK/`** in namespace **`C_.Analyzer.SDK`**. The package enforces the C_ language discipline on the hot path: code that is not explicitly exempt must avoid heap allocations, reflection, interface dispatch, async/iterator patterns, **`catch`** on the hot path, and I/O that the rule set recognizes.
 
 Language background and rationale live in **`docs/lang.md`**; this document describes **what the analyzer checks** and **how** exemptions work.
 

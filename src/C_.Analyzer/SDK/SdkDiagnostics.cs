@@ -1,10 +1,10 @@
 using Microsoft.CodeAnalysis;
 
-namespace C_.Analyzer;
+namespace C_.Analyzer.SDK;
 
 /// <summary>
 /// Diagnostic descriptors for <c>C_.SDK</c> API contracts (<c>C_SDK*</c> ids). Registered by
-/// <see cref="ArenaCopyAnalyzer"/> and <see cref="ArenaFieldAnalyzer"/>, not <see cref="HotPathAnalyzer"/>.
+/// <see cref="ArenaCopyAnalyzer"/> and <see cref="ArenaFieldAnalyzer"/>, not <see cref="C_.Analyzer.HotPathAnalyzer"/>.
 /// </summary>
 internal static class SdkDiagnostics
 {

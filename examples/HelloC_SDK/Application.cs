@@ -23,8 +23,7 @@ public static partial class Application
 
     public static void Tick()
     {
-        Span<byte> backing = stackalloc byte[64];
-        var arena = new Arena(backing);
+        var arena = new Arena(stackalloc byte[64]);
         if (!arena.TryAlloc<int>(4, out var ints))
             return;
         ints[0] = _frame;
